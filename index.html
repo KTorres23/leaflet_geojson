@@ -1,1 +1,127 @@
-// To do
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+ <meta charset="UTF-8">
+
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+ <title>Hello Leaflet</title>
+
+ <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+ integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+ crossorigin=""/>
+ <!-- Make sure you put this AFTER Leaflet's CSS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+  crossorigin=""></script>
+
+<style>
+    #map { height: 100vh; }
+</style>
+
+
+</head>
+
+<body>
+
+
+    <div id="map"></div>
+
+    <script>
+        var map = L.map('map').setView([0, 0], 2);
+
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        axZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+    fetch('map_KTorres.geojson')
+        .then(response => response.json())
+        .then(data => {
+          L.geoJSON(data).addTo(map);
+    });
+
+    var marker = L.marker([30.606765689115424, -87.07461891902409]).addTo(map);
+
+    var circle = L.circle([30.606765689115424, -87.07461891902409], {
+        color: 'red',
+        fillColor: '#f03',
+        fillOpacity: 0.5,
+        radius: 500
+    }).addTo(map);
+
+    var polygon = L.polygon([
+        [30.62, -87.1],
+        [30.59, -87.1],
+        [30.62, -87.069]
+    ]).addTo(map);
+
+    marker.bindPopup("<div style='text-align: center;'><b>University of Florida</b><br>Milton campus</div>").openPopup();
+    circle.bindPopup("This is the UF in Milton campus.");
+    polygon.bindPopup("I am a polygon.");
+
+    var popup = L.popup()
+        .setLatLng([30.616765689115424, -87.07461891902409])
+        .setContent("Here is some forested land.")
+        .openOn(map);
+
+
+    var popup = L.popup();
+
+    function onMapClick(e) {
+        popup
+            .setLatLng(e.latlng)
+            .setContent("You clicked the map at " + e.latlng.toString())
+            .openOn(map);
+    }
+
+    map.on('click', onMapClick);
+
+    // Geolocation
+    var userLocation;
+
+    function onLocationFound(e) {
+        var radius = e.accuracy / 2;
+        userLocation = e.latlng;
+
+        L.circle(e.latlng, radius).addTo(map);
+    }
+
+    map.on('locationfound', onLocationFound);
+
+    function onLocationError(e) {
+        alert(e.message);
+    }
+
+    map.on('locationerror', onLocationError);
+
+    // Start locating the user without changing the view
+    map.locate({setView: false, maxZoom: 16});
+
+    function onMapClick(e) {
+        if (userLocation) {
+            var distance = map.distance(userLocation, e.latlng) / 1000; // Convert meters to kilometers
+            popup
+                .setLatLng(e.latlng)
+                .setContent("You clicked the map at " + e.latlng.toString() + "<br>Distance from your location: " + distance.toFixed(2) + " kilometers")
+                .openOn(map);
+        } else {
+            popup
+                .setLatLng(e.latlng)
+                .setContent("You clicked the map at " + e.latlng.toString())
+                .openOn(map);
+        }
+    }
+
+    map.on('click', onMapClick);
+
+
+
+    </script>
+
+</body>
+
+</html>
